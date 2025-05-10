@@ -1,10 +1,27 @@
 from flask import Flask, request, jsonify
 import requests
 import os
+import requests
 
 app = Flask(__name__)
 
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
+
+LAPTOP_URL = "http://192.168.1.1:5050/control"  # Cambia esta IP si es diferente
+
+# Dirección IP local de tu laptop conectada en la misma red (ajústala más adelante)
+def enviar_comando_laptop(comando, url=None):
+    try:
+        payload = {"command": comando}
+        if url:
+            payload["url"] = url
+
+        response = requests.post(LAPTOP_URL, json=payload, timeout=1)
+        return response.status_code == 200
+    except Exception as e:
+        print("No se pudo contactar con la laptop:", e)
+        return False
+        
 YOUTUBE_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
 
 @app.route("/webhook", methods=["POST"])
@@ -21,9 +38,31 @@ def alexa_webhook():
                 song_name = intent["slots"]["song"]["value"]
                 video_title, video_url = search_youtube(song_name)
 
+                # Llama a la laptop (si está encendida)
+                laptop_activa = enviar_comando_laptop("open", url=video_url)
+
                 speech_text = f"Encontré {video_title} en YouTube."
                 return build_response(video_title, video_url)
+            elif intent["name"] == "PauseVideoIntent":
+                enviar_comando_laptop("pause")
+                return build_response("Video pausado.")
 
+            elif intent["name"] == "VolumeUpIntent":
+                enviar_comando_laptop("volume_up")
+                return build_response("Subiendo el volumen.")
+
+            elif intent["name"] == "VolumeDownIntent":
+                enviar_comando_laptop("volume_down")
+                return build_response("Bajando el volumen.")
+
+            elif intent["name"] == "NextSongIntent":
+                enviar_comando_laptop("next")
+                return build_response("Pasando a la siguiente canción.")
+
+            elif intent["name"] == "CloseYoutubeIntent":
+                enviar_comando_laptop("close")
+                return build_response("Cerrando YouTube.")
+        
         return build_response("No entendí tu solicitud.")
     
     except Exception as e:
