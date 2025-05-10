@@ -22,7 +22,7 @@ def alexa_webhook():
                 video_title, video_url = search_youtube(song_name)
 
                 speech_text = f"Encontré {video_title} en YouTube."
-                return build_response(speech_text, video_url)
+                return build_response(video_title, video_url)
 
         return build_response("No entendí tu solicitud.")
     
@@ -47,7 +47,9 @@ def search_youtube(query):
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     return video_title, video_url
 
-def build_response(speech_text, video_url=None):
+def build_response(video_title, video_url=None):
+    speech_text = f"Encontré {video_title} en YouTube. Te envié el enlace a la app de Alexa."
+
     response = {
         "version": "1.0",
         "response": {
