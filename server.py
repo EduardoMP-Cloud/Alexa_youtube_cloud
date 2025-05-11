@@ -18,7 +18,7 @@ def enviar_comando_laptop(comando, url=None):
 
         response = requests.post(LAPTOP_URL, json=payload, timeout=1)
         return response.status_code == 200
-        print("Enviando comando a laptop:", payload)
+        
     except Exception as e:
         print("No se pudo contactar con la laptop:", e)
         return False
