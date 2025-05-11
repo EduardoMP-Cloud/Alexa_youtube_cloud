@@ -15,11 +15,12 @@ def enviar_comando_laptop(comando, url=None):
         payload = {"command": comando}
         if url:
             payload["url"] = url
-
-        response = requests.post(LAPTOP_URL, json=payload, timeout=1)
-        return response.status_code == 200
+            
         print(f"Enviando a laptop: {payload} -> {LAPTOP_URL}")
         
+        response = requests.post(LAPTOP_URL, json=payload, timeout=1)
+        return response.status_code == 200
+                
     except Exception as e:
         print("No se pudo contactar con la laptop:", e)
         return False
