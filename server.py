@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 
-LAPTOP_URL = "http://192.168.1.35:5050/control"  # Cambia esta IP si es diferente
+LAPTOP_URL = "https://f3a9-2001-1388-1e43-8c51-bdf9-45d1-dfc0-5ebe.ngrok-free.app/control"  # Se usa ngrok http 5050
 
 # Dirección IP local de tu laptop conectada en la misma red (ajústala más adelante)
 def enviar_comando_laptop(comando, url=None):
