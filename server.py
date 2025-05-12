@@ -48,6 +48,10 @@ def alexa_webhook():
             elif intent["name"] == "PauseVideoIntent":
                 enviar_comando_laptop("pause")
                 return build_response("Video pausado.")
+                
+            elif intent["name"] == "ResumeVideoIntent":
+                enviar_comando_laptop("play")
+                return build_response("Reproduciendo el video.")
 
             elif intent["name"] == "VolumeUpIntent":
                 enviar_comando_laptop("volume_up")
