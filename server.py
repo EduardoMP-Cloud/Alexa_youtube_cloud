@@ -39,6 +39,11 @@ def alexa_webhook():
             intent = data["request"]["intent"]
             if intent["name"] == "PlaySongIntent":
                 song_name = intent["slots"]["song"]["value"]
+                
+                # Validación para evitar malentendidos
+                if not song_name or any(word in song_name.lower() for word in ["volumen", "pausa", "cierra", "siguiente"]):
+                return build_response("No entendí bien qué canción deseas reproducir. Por favor, intenta de nuevo.")
+                    
                 video_title, video_url = search_youtube(song_name)
 
                 # Llama a la laptop (si está encendida)
