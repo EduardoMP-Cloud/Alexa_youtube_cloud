@@ -49,7 +49,6 @@ def alexa_webhook():
                 # Llama a la laptop (si está encendida)
                 laptop_activa = enviar_comando_laptop("open", url=video_url)
 
-                speech_text = f"Encontré {video_title} en YouTube."
                 return build_response(video_title, video_url)
             elif intent["name"] == "PauseVideoIntent":
                 enviar_comando_laptop("pause")
