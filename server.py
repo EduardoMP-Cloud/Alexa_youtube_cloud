@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
 import os
-import requests
 
 app = Flask(__name__)
 
@@ -9,22 +8,21 @@ YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 
 LAPTOP_URL = "https://f3a9-2001-1388-1e43-8c51-bdf9-45d1-dfc0-5ebe.ngrok-free.app/control"  # Se usa ngrok http 5050
 
-# Dirección IP local de tu laptop conectada en la misma red (ajústala más adelante)
 def enviar_comando_laptop(comando, url=None):
     try:
         payload = {"command": comando}
         if url:
             payload["url"] = url
-            
+
         print(f"Enviando a laptop: {payload} -> {LAPTOP_URL}")
-        
+
         response = requests.post(LAPTOP_URL, json=payload, timeout=1)
         return response.status_code == 200
-                
+
     except Exception as e:
         print("No se pudo contactar con la laptop:", e)
         return False
-        
+
 YOUTUBE_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
 
 @app.route("/webhook", methods=["POST"])
@@ -39,17 +37,14 @@ def alexa_webhook():
             intent = data["request"]["intent"]
             if intent["name"] == "PlaySongIntent":
                 song_name = intent["slots"]["song"]["value"]
-                
-                # Validación para evitar malentendidos
+
                 if not song_name or any(word in song_name.lower() for word in ["volumen", "pausa", "cierra", "siguiente"]):
                     return build_response("No entendí bien qué canción deseas reproducir. Por favor, intenta de nuevo.")
-                    
+
                 video_title, video_url = search_youtube(song_name)
-
-                # Llama a la laptop (si está encendida)
                 laptop_activa = enviar_comando_laptop("open", url=video_url)
+                return build_response(f"Encontré {video_title} en YouTube. Te envié el enlace a la app de Alexa.", video_url)
 
-                return build_response(video_title, video_url)
             elif intent["name"] == "PauseVideoIntent":
                 enviar_comando_laptop("pause")
                 return build_response("Video pausado.")
@@ -69,9 +64,9 @@ def alexa_webhook():
             elif intent["name"] == "CloseYoutubeIntent":
                 enviar_comando_laptop("close")
                 return build_response("Cerrando YouTube.")
-        
+
         return build_response("No entendí tu solicitud.")
-    
+
     except Exception as e:
         print(f"Error: {e}")
         return build_response("Ocurrió un error al procesar la solicitud.")
@@ -93,9 +88,7 @@ def search_youtube(query):
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     return video_title, video_url
 
-def build_response(video_title, video_url=None):
-    speech_text = f"Encontré {video_title} en YouTube. Te envié el enlace a la app de Alexa."
-
+def build_response(speech_text, video_url=None):
     response = {
         "version": "1.0",
         "response": {
@@ -118,3 +111,4 @@ def build_response(video_title, video_url=None):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
