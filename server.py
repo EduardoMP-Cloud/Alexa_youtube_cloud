@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 
-LAPTOP_URL = "https://f3a9-2001-1388-1e43-8c51-bdf9-45d1-dfc0-5ebe.ngrok-free.app/control"  # Se usa ngrok http 5050
+LAPTOP_URL = "https://a418-2001-1388-1e43-fe43-ac70-4e76-f0fa-547d.ngrok-free.app/control"  # Se usa ngrok http 5050
 
 def enviar_comando_laptop(comando, url=None):
     try:
