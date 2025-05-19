@@ -7,8 +7,8 @@ app = Flask(__name__)
 # Clave API de YouTube
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 
-# Dirección de tu laptop (vía ngrok o Tailscale si lo habilitas luego)
-LAPTOP_URL = "https://a418-2001-1388-1e43-fe43-ac70-4e76-f0fa-547d.ngrok-free.app/control"
+# Dirección de tu laptop (vía Tailscale)
+LAPTOP_URL = "http://100.90.173.124:5050/control"
 
 def enviar_comando_laptop(comando, url=None):
     try:
