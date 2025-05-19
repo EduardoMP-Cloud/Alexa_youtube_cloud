@@ -4,10 +4,10 @@ import os
 
 app = Flask(__name__)
 
-# Clave API de YouTube
+# Tu API Key de YouTube (debe estar configurada como variable de entorno en Render)
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 
-# Dirección de tu laptop (vía Tailscale)
+# Dirección IP de tu laptop a través de Tailscale
 LAPTOP_URL = "http://100.90.173.124:5050/control"
 
 def enviar_comando_laptop(comando, url=None):
@@ -16,20 +16,18 @@ def enviar_comando_laptop(comando, url=None):
         if url:
             payload["url"] = url
 
-        print(f"Enviando a laptop: {payload} -> {LAPTOP_URL}")
-        response = requests.post(LAPTOP_URL, json=payload, timeout=1)
+        print(f"✅ Enviando a laptop: {payload} -> {LAPTOP_URL}")
+        response = requests.post(LAPTOP_URL, json=payload, timeout=2)
         return response.status_code == 200
-
     except Exception as e:
-        print("No se pudo contactar con la laptop:", e)
+        print(f"❌ Error al contactar con la laptop: {e}")
         return False
-
-YOUTUBE_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
 
 @app.route("/webhook", methods=["POST"])
 def alexa_webhook():
     try:
         data = request.get_json()
+        print("📡 Solicitud recibida desde Alexa")
 
         if data["request"]["type"] == "LaunchRequest":
             return build_response("Bienvenido. Dime qué canción deseas reproducir.")
@@ -42,7 +40,7 @@ def alexa_webhook():
                 song_name = intent["slots"]["song"]["value"]
                 if not song_name or any(word in song_name.lower() for word in ["volumen", "pausa", "cierra", "siguiente"]):
                     return build_response("No entendí bien qué canción deseas reproducir. Por favor, intenta de nuevo.")
-
+                
                 video_title, video_url = search_youtube(song_name)
                 enviar_comando_laptop("open", url=video_url)
                 return build_response(f"Encontré {video_title} en YouTube. Te envié el enlace a la app de Alexa.", video_url)
@@ -64,7 +62,6 @@ def alexa_webhook():
                 return build_response("Bajando el volumen.")
 
             elif name == "NextSongIntent":
-                # También podrías buscar una nueva canción automáticamente aquí si lo deseas
                 enviar_comando_laptop("next")
                 return build_response("Pasando a la siguiente canción.")
 
@@ -75,7 +72,7 @@ def alexa_webhook():
         return build_response("No entendí tu solicitud.")
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"❌ Error en el webhook: {e}")
         return build_response("Ocurrió un error al procesar la solicitud.")
 
 def search_youtube(query):
@@ -86,7 +83,7 @@ def search_youtube(query):
         "maxResults": 1,
         "type": "video"
     }
-    response = requests.get(YOUTUBE_SEARCH_URL, params=params)
+    response = requests.get("https://www.googleapis.com/youtube/v3/search", params=params)
     results = response.json()
     item = results["items"][0]
     video_title = item["snippet"]["title"]
